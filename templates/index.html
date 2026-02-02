@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DigitAI</title>
+    <script src="/static/jquery.js"></script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(45deg, #40e0d0, #20b2aa, #007FFF, #4169E1, #708090);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite alternate-reverse;
+    overflow: hidden;
+    position: relative;
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.particle {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleAnimation 10s linear infinite;
+}
+
+@keyframes particleAnimation {
+    0% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(100vw, 100vh);
+        opacity: 0;
+    }
+}
+
+body::before,
+body::after,
+.particle {
+    content: '';
+    width: 10px;
+    height: 10px;
+}
+
+body::before {
+    top: 50%;
+    left: 50%;
+}
+
+body::after {
+    top: 20%;
+    left: 80%;
+}
+
+.particle {
+    top: calc(100% * var(--rand));
+    left: calc(100% * var(--rand));
+    animation-delay: calc(var(--delay) * 1s);
+}
+
+.particle:nth-child(3) {
+    --rand: 0.2;
+    --delay: 0.5;
+}
+
+.particle:nth-child(4) {
+    --rand: 0.7;
+    --delay: 1.2;
+}
+
+.particle:nth-child(5) {
+    --rand: 0.4;
+    --delay: 1.5;
+}
+
+#idForm {
+    max-width: 500px;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    background-color: #00b4d8;
+    color: #fff;
+    font-size: 20px;
+}
+
+#images {
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#images img {
+    margin-bottom: 10px;
+    display: block;
+    max-width: 100%;
+    border-radius: 5px;
+}
+
+#idForm input[type="text"],
+#idForm button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+    width: calc(50% - 5px);
+}
+
+#idForm button {
+    background-color: #00b4d8;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+#idForm input[type="text"]:hover,
+#idForm button:hover {
+    background-color: #0096b3;
+    color: #fff;
+}
+
+#idForm input[type="text"]:focus,
+#idForm button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 180, 216, 0.5);
+}
+    </style>
+</head>
+<body>
+
+    <form action="/generate/" method="post" id="idForm" onsubmit="return false;"> 
+        <input type="text" id="number" name="number" placeholder="Number to generate" />
+        <input type="text" id="gen" name="gen" placeholder="Number of generations(3 max)" />
+        <button type="submit" onclick="getImages();">Generate</button>
+    </form>
+
+    <div id="images"></div>
+
+    <script>
+        function getImages(){
+            var form = $("#idForm");
+            var actionUrl = form.attr('action');
+            $.ajax({
+                type: "POST",
+                url: actionUrl,
+                data: form.serialize(),
+                success: function(data) {
+                    data = JSON.parse(data);
+                    $("#images").html("");
+                    for (let i = 0; i < data["images"].length; i++){
+                        var elem = document.createElement("img");
+                        elem.setAttribute("src", data['images'][i] + "?" + new Date().getTime());
+                        document.getElementById("images").appendChild(elem);
+                    }
+                }
+            });
+            return false;
+        }
+    </script>
+</body>
+</html>
